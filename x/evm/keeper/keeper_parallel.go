@@ -7,8 +7,8 @@ import (
 	"github.com/okex/exchain/x/evm/types"
 )
 
-func (k *Keeper) FixLog(execResults [][]string) map[int][]byte {
-	res := make(map[int][]byte, 0)
+func (k *Keeper) FixLog(execResults [][]string) [][]byte {
+	res := make([][]byte, 0)
 	logSize := uint(0)
 	txInBlock := int(-1)
 	k.Bloom = new(big.Int)
@@ -34,7 +34,7 @@ func (k *Keeper) FixLog(execResults [][]string) map[int][]byte {
 		if err != nil {
 			panic(err)
 		}
-		res[index] = data
+		res = append(res, data)
 	}
 	k.LogsManages.Reset()
 	return res

@@ -4,17 +4,16 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	authante "github.com/cosmos/cosmos-sdk/x/auth/ante"
+	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/supply"
 	"github.com/okex/exchain/x/evm"
 	evmtypes "github.com/okex/exchain/x/evm/types"
 )
 
 // feeCollectorHandler set or get the value of feeCollectorAcc
-func updateFeeCollectorHandler(ak auth.AccountKeeper, sk supply.Keeper) sdk.UpdateFeeCollectorAccHandler {
+func updateFeeCollectorHandler(bk bank.Keeper, sk supply.Keeper) sdk.UpdateFeeCollectorAccHandler {
 	return func(ctx sdk.Context, balance sdk.Coins) {
-		acc := ak.GetAccount(ctx, sk.GetModuleAddress(auth.FeeCollectorName))
-		acc.SetCoins(balance)
-		ak.SetAccount(ctx, acc)
+		bk.AddCoins(ctx, sk.GetModuleAddress(auth.FeeCollectorName), balance)
 	}
 }
 
@@ -33,7 +32,7 @@ func evmTxFeeHandler() sdk.GetTxFeeHandler {
 
 // fixLogForParallelTxHandler fix log for parallel tx
 func fixLogForParallelTxHandler(ek *evm.Keeper) sdk.LogFix {
-	return func(execResults [][]string) (logs map[int][]byte) {
+	return func(execResults [][]string) (logs [][]byte) {
 		return ek.FixLog(execResults)
 	}
 }
