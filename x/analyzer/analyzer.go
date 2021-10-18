@@ -46,7 +46,7 @@ func init() {
 func newAnalys(height int64) {
 	if singleAnalys == nil {
 		singleAnalys = &analyer{
-			status:      false,
+			status:      true,
 			blockHeight: height,
 		}
 	}
@@ -214,12 +214,12 @@ func (s *analyer) format() {
 	}
 
 	var keys = []string{"DeliverTx", "txDecoder", "BaseApp-run",
-		"initCtx",  "valTxMsgs", "anteHandler",
+		"initCtx", "valTxMsgs", "anteHandler",
 		"runMsgs", "refund", "evmtx",
 		"ParseChainID", "VerifySig", "txhash",
 		"SaveTx", "TransitionDb", "EmitEvents", "AppendEvents"}
 
-	for _ , v  := range keys{
+	for _, v := range keys {
 		format += fmt.Sprintf("%s<%dms>, ", v, record[v])
 	}
 
