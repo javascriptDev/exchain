@@ -1,6 +1,8 @@
 package evm
 
 import (
+	"unsafe"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/ethereum/go-ethereum/common"
@@ -11,7 +13,6 @@ import (
 	"github.com/okex/exchain/x/evm/types"
 	"github.com/okex/exchain/x/evm/watcher"
 	tmtypes "github.com/tendermint/tendermint/types"
-	"unsafe"
 )
 
 // NewHandler returns a handler for Ethermint type messages.
@@ -144,12 +145,10 @@ func handleMsgEthereumTx(ctx sdk.Context, k *Keeper, msg types.MsgEthereumTx) (*
 		bytes2str := func(b []byte) string {
 			return *(*string)(unsafe.Pointer(&b))
 		}
-
-		tmp := keeper.TxResult{
+		k.LogsManages.Set(bytes2str(ctx.TxBytes()), keeper.TxResult{
 			ResultData: resultData,
 			Err:        err,
-		}
-		k.LogsManages.Set(bytes2str(ctx.TxBytes()), tmp)
+		})
 	}
 
 	if err != nil {

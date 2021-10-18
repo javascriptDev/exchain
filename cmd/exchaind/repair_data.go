@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/spf13/viper"
 	"io"
 	"log"
 	"path/filepath"
@@ -10,6 +9,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/server"
 	"github.com/okex/exchain/app"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"github.com/tendermint/iavl"
 	tmlog "github.com/tendermint/tendermint/libs/log"
 	"github.com/tendermint/tendermint/mock"

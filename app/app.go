@@ -432,7 +432,7 @@ func NewOKExChainApp(
 	app.SetEndBlocker(app.EndBlocker)
 	app.SetGasRefundHandler(refund.NewGasRefundHandler(app.AccountKeeper, app.SupplyKeeper))
 	app.SetAccHandler(NewAccHandler(app.AccountKeeper))
-	app.SetPallTxHandler(NewFeeCollectorAccHandler(app.AccountKeeper, app.SupplyKeeper), NewGetTxFeeHandler(), NewFixLog(app.EvmKeeper))
+	app.SetParallelTxHandlers(feeCollectorHandler(app.AccountKeeper, app.SupplyKeeper), evmTxFeeHandler(), fixLogForParallelTxHandler(app.EvmKeeper))
 
 	if loadLatest {
 		err := app.LoadLatestVersion(app.keys[bam.MainStoreKey])
@@ -598,7 +598,7 @@ func validateMsgHook(orderKeeper order.Keeper) ante.ValidateMsgHandler {
 func NewAccHandler(ak auth.AccountKeeper) sdk.AccHandler {
 	return func(
 		ctx sdk.Context, addr sdk.AccAddress,
-	) (uint64, sdk.Coins) {
-		return ak.GetAccount(ctx, addr).GetSequence(), ak.GetAccount(ctx, addr).GetCoins()
+	) uint64 {
+		return ak.GetAccount(ctx, addr).GetSequence()
 	}
 }

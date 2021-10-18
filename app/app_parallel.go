@@ -9,7 +9,8 @@ import (
 	evmtypes "github.com/okex/exchain/x/evm/types"
 )
 
-func NewFeeCollectorAccHandler(ak auth.AccountKeeper, sk supply.Keeper) sdk.FeeCollectorAccHandler {
+// feeCollectorHandler set or get the value of feeCollectorAcc
+func feeCollectorHandler(ak auth.AccountKeeper, sk supply.Keeper) sdk.FeeCollectorAccHandler {
 	return func(ctx sdk.Context, updateValue bool, balance sdk.Coins) sdk.Coins {
 		acc := ak.GetAccount(ctx, sk.GetModuleAddress(auth.FeeCollectorName))
 		if updateValue {
@@ -20,7 +21,8 @@ func NewFeeCollectorAccHandler(ak auth.AccountKeeper, sk supply.Keeper) sdk.FeeC
 	}
 }
 
-func NewGetTxFeeHandler() sdk.GetTxFeeHandler {
+// evmTxFeeHandler get tx fee for evm tx
+func evmTxFeeHandler() sdk.GetTxFeeHandler {
 	return func(tx sdk.Tx) (fee sdk.Coins, isEvm bool) {
 		if _, ok := tx.(evmtypes.MsgEthereumTx); ok {
 			isEvm = true
@@ -32,8 +34,9 @@ func NewGetTxFeeHandler() sdk.GetTxFeeHandler {
 	}
 }
 
-func NewFixLog(ek *evm.Keeper) sdk.LogFix {
-	return func(isAnteFailed [][]string) (logs map[int][]byte) {
-		return ek.FixLog(isAnteFailed)
+// fixLogForParallelTxHandler fix log for parallel tx
+func fixLogForParallelTxHandler(ek *evm.Keeper) sdk.LogFix {
+	return func(execResults [][]string) (logs map[int][]byte) {
+		return ek.FixLog(execResults)
 	}
 }
