@@ -46,7 +46,7 @@ func init() {
 func newAnalys(height int64) {
 	if singleAnalys == nil {
 		singleAnalys = &analyer{
-			status:      true,
+			status:      false,
 			blockHeight: height,
 		}
 	}
