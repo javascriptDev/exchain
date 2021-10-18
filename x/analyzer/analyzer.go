@@ -2,6 +2,8 @@ package analyzer
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/tendermint/tendermint/trace"
 )
 
@@ -37,9 +39,6 @@ func init() {
 	for _, v := range EVM_OPER {
 		dbOper.AddOperType(v, EVMALL)
 	}
-	for _, v := range UNKNOWN {
-		dbOper.AddOperType(v, UNKNOWN_TYPE)
-	}
 
 }
 
@@ -55,6 +54,10 @@ func newAnalys(height int64) {
 func OnAppBeginBlockEnter(height int64) {
 	newAnalys(height)
 	singleAnalys.onAppBeginBlockEnter()
+	lastElapsedTime := trace.GetElapsedInfo().GetElapsedTime()
+	if singlePprofDumper != nil && lastElapsedTime > singlePprofDumper.triggerAbciElapsed {
+		singlePprofDumper.cpuProfile(height)
+	}
 }
 
 func OnAppBeginBlockExit() {
@@ -191,10 +194,7 @@ func (s *analyer) format() {
 	var record = make(map[string]int64)
 	for _, v := range s.txs {
 		for oper, operObj := range v.Record {
-			operType, err := dbOper.GetOperType(oper)
-			if err != nil {
-				continue
-			}
+			operType := dbOper.GetOperType(oper)
 			switch operType {
 			case READ:
 				s.dbRead += operObj.TimeCost
@@ -208,7 +208,6 @@ func (s *analyer) format() {
 				} else {
 					record[oper] += operObj.TimeCost
 				}
-
 			}
 		}
 	}
@@ -222,9 +221,8 @@ func (s *analyer) format() {
 	for _, v := range keys {
 		format += fmt.Sprintf("%s<%dms>, ", v, record[v])
 	}
-
+	format = strings.TrimRight(format, ", ")
 	trace.GetElapsedInfo().AddInfo(trace.Evm, fmt.Sprintf(EVM_FORMAT, s.dbRead, s.dbWrite, evmcore-s.dbRead-s.dbWrite))
 
-	//format += fmt.Sprintf("%s<%dms>", "exchainDeliverTx", s.delliverTxCost)
 	trace.GetElapsedInfo().AddInfo("DeliverTxs", format)
 }
