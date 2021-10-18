@@ -6,6 +6,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	ethermint "github.com/okex/exchain/app/types"
 	"github.com/okex/exchain/x/analyzer"
+	"github.com/okex/exchain/x/common/perf"
 	"github.com/okex/exchain/x/evm/keeper"
 	"github.com/okex/exchain/x/evm/types"
 	"github.com/okex/exchain/x/evm/watcher"
@@ -19,15 +20,15 @@ func NewHandler(k *Keeper) sdk.Handler {
 		ctx = ctx.WithEventManager(sdk.NewEventManager())
 
 		var handlerFun func() (*sdk.Result, error)
-		//var name string
+		var name string
 		switch msg := msg.(type) {
 		case types.MsgEthereumTx:
-			//name = "handleMsgEthereumTx"
+			name = "handleMsgEthereumTx"
 			handlerFun = func() (*sdk.Result, error) {
 				return handleMsgEthereumTx(ctx, k, msg)
 			}
 		case types.MsgEthermint:
-			//name = "handleMsgEthermint"
+			name = "handleMsgEthermint"
 			handlerFun = func() (*sdk.Result, error) {
 				return handleMsgEthermint(ctx, k, msg)
 			}
@@ -35,8 +36,10 @@ func NewHandler(k *Keeper) sdk.Handler {
 			return nil, sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "unrecognized %s message type: %T", ModuleName, msg)
 		}
 
-		//seq := perf.GetPerf().OnDeliverTxEnter(ctx, types.ModuleName, name) //TODO panic????
-		//defer perf.GetPerf().OnDeliverTxExit(ctx, types.ModuleName, name, seq)
+		if !ctx.IsAsync() {
+			seq := perf.GetPerf().OnDeliverTxEnter(ctx, types.ModuleName, name) //TODO panic????
+			defer perf.GetPerf().OnDeliverTxExit(ctx, types.ModuleName, name, seq)
+		}
 
 		result, err = handlerFun()
 		if err != nil {
