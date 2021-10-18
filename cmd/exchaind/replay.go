@@ -258,8 +258,10 @@ func doReplay(ctx *server.Context, state sm.State, stateStoreDB dbm.DB,
 		meta := originBlockStore.LoadBlockMeta(height)
 		blockExec.SetIsAsyncDeliverTx(viper.GetBool(pallTx))
 		state, _, err = blockExec.ApplyBlock(state, meta.BlockID, block)
+		if err != nil {
+			SaveBlock(ctx, originBlockStore, height)
+		}
 		panicError(err)
-		//SaveBlock(ctx, originBlockStore, height)
 	}
 	fmt.Println("AllTxs", sm.AllTxs, "PallTxs", sm.PallTxs, "Conflict Txs", sm.AllTxs-sm.PallTxs)
 }

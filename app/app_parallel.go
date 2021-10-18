@@ -10,14 +10,11 @@ import (
 )
 
 // feeCollectorHandler set or get the value of feeCollectorAcc
-func feeCollectorHandler(ak auth.AccountKeeper, sk supply.Keeper) sdk.FeeCollectorAccHandler {
-	return func(ctx sdk.Context, updateValue bool, balance sdk.Coins) sdk.Coins {
+func updateFeeCollectorHandler(ak auth.AccountKeeper, sk supply.Keeper) sdk.UpdateFeeCollectorAccHandler {
+	return func(ctx sdk.Context, balance sdk.Coins) {
 		acc := ak.GetAccount(ctx, sk.GetModuleAddress(auth.FeeCollectorName))
-		if updateValue {
-			acc.SetCoins(balance)
-			ak.SetAccount(ctx, acc)
-		}
-		return acc.GetCoins()
+		acc.SetCoins(balance)
+		ak.SetAccount(ctx, acc)
 	}
 }
 
