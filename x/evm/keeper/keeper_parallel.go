@@ -8,7 +8,7 @@ import (
 )
 
 func (k *Keeper) FixLog(execResults [][]string) [][]byte {
-	res := make([][]byte, 0)
+	res := make([][]byte, len(execResults), len(execResults))
 	logSize := uint(0)
 	txInBlock := int(-1)
 	k.Bloom = new(big.Int)
@@ -19,7 +19,6 @@ func (k *Keeper) FixLog(execResults [][]string) [][]byte {
 			continue
 		}
 		txInBlock++
-
 		if rs.ResultData == nil {
 			continue
 		}
@@ -29,12 +28,13 @@ func (k *Keeper) FixLog(execResults [][]string) [][]byte {
 			v.TxIndex = uint(txInBlock)
 			logSize++
 		}
+
 		k.Bloom = k.Bloom.Or(k.Bloom, rs.ResultData.Bloom.Big())
 		data, err := types.EncodeResultData(*rs.ResultData)
 		if err != nil {
 			panic(err)
 		}
-		res = append(res, data)
+		res[index] = data
 	}
 	k.LogsManages.Reset()
 	return res
