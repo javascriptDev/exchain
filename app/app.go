@@ -432,7 +432,7 @@ func NewOKExChainApp(
 	app.SetEndBlocker(app.EndBlocker)
 	app.SetGasRefundHandler(refund.NewGasRefundHandler(app.AccountKeeper, app.SupplyKeeper))
 	app.SetAccHandler(NewAccHandler(app.AccountKeeper))
-	app.SetPallTxHandler(NewIsEvmTxHandler, NewFeeCollectorAccHandler(app.AccountKeeper, app.SupplyKeeper), NewGetTxFeeHandler(), NewFixLog(app.EvmKeeper))
+	app.SetPallTxHandler(NewFeeCollectorAccHandler(app.AccountKeeper, app.SupplyKeeper), NewGetTxFeeHandler(), NewFixLog(app.EvmKeeper))
 
 	if loadLatest {
 		err := app.LoadLatestVersion(app.keys[bam.MainStoreKey])

@@ -9,16 +9,6 @@ import (
 	evmtypes "github.com/okex/exchain/x/evm/types"
 )
 
-func NewIsEvmTxHandler(tx sdk.Tx) bool {
-	if tx != nil {
-		switch tx.(type) {
-		case evmtypes.MsgEthereumTx:
-			return true
-		}
-	}
-	return false
-}
-
 func NewFeeCollectorAccHandler(ak auth.AccountKeeper, sk supply.Keeper) sdk.FeeCollectorAccHandler {
 	return func(ctx sdk.Context, updateValue bool, balance sdk.Coins) sdk.Coins {
 		acc := ak.GetAccount(ctx, sk.GetModuleAddress(auth.FeeCollectorName))
@@ -31,12 +21,14 @@ func NewFeeCollectorAccHandler(ak auth.AccountKeeper, sk supply.Keeper) sdk.FeeC
 }
 
 func NewGetTxFeeHandler() sdk.GetTxFeeHandler {
-	return func(tx sdk.Tx) sdk.Coins {
-		feeTx, ok := tx.(authante.FeeTx)
-		if ok {
-			return feeTx.GetFee()
+	return func(tx sdk.Tx) (fee sdk.Coins, isEvm bool) {
+		if _, ok := tx.(evmtypes.MsgEthereumTx); ok {
+			isEvm = true
 		}
-		return sdk.Coins{}
+		if feeTx, ok := tx.(authante.FeeTx); ok {
+			fee = feeTx.GetFee()
+		}
+		return
 	}
 }
 
