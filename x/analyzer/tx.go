@@ -7,7 +7,7 @@ import (
 type txLog struct {
 	startTime int64
 	AllCost   int64
-	Record map[string]*operateInfo
+	Record    map[string]*operateInfo // not support pall tx
 }
 
 func newTxLog() *txLog {

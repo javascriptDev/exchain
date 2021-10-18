@@ -37,7 +37,7 @@ func repairStateCmd(ctx *server.Context) *cobra.Command {
 		},
 	}
 	cmd.Flags().Int64Var(&commitInterval, FlagCommitInterval, 100, "The number of interval heights for submitting Commit")
-	cmd.Flags().Bool(pallTx, false, "pall Tx")
+	cmd.Flags().Bool(pallTx, false, "parallel execution for evm txs")
 	return cmd
 }
 
