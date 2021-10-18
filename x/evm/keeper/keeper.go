@@ -3,9 +3,6 @@ package keeper
 import (
 	"encoding/binary"
 	"fmt"
-	"math/big"
-	"sync"
-
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -17,6 +14,7 @@ import (
 	"github.com/okex/exchain/x/evm/watcher"
 	"github.com/okex/exchain/x/params"
 	"github.com/tendermint/tendermint/libs/log"
+	"math/big"
 )
 
 // Keeper wraps the CommitStateDB, allowing us to pass in SDK context while adhering
@@ -48,42 +46,6 @@ type Keeper struct {
 	Watcher     *watcher.Watcher
 	Ada         types.DbAdapter
 	LogsManages *LogsManager
-}
-
-type LogsManager struct {
-	mu      sync.RWMutex
-	Results map[string]TxResult
-}
-
-func NewLogManager() *LogsManager {
-	return &LogsManager{
-		mu:      sync.RWMutex{},
-		Results: make(map[string]TxResult),
-	}
-}
-
-func (l *LogsManager) Set(txBytes string, value TxResult) {
-	l.mu.Lock()
-	defer l.mu.Unlock()
-	l.Results[txBytes] = value
-}
-
-func (l *LogsManager) Get(txBytes string) (TxResult, bool) {
-	l.mu.RLock()
-	defer l.mu.RUnlock()
-	data, ok := l.Results[txBytes]
-	return data, ok
-}
-
-func (l *LogsManager) Len() int {
-	l.mu.RLock()
-	defer l.mu.RUnlock()
-	return len(l.Results)
-}
-
-type TxResult struct {
-	ResultData *types.ResultData
-	Err        error
 }
 
 // NewKeeper generates new evm module keeper

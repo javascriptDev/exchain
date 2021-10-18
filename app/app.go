@@ -16,7 +16,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/version"
 	"github.com/cosmos/cosmos-sdk/x/auth"
-	authante "github.com/cosmos/cosmos-sdk/x/auth/ante"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
 	"github.com/cosmos/cosmos-sdk/x/mint"
@@ -433,10 +432,7 @@ func NewOKExChainApp(
 	app.SetEndBlocker(app.EndBlocker)
 	app.SetGasRefundHandler(refund.NewGasRefundHandler(app.AccountKeeper, app.SupplyKeeper))
 	app.SetAccHandler(NewAccHandler(app.AccountKeeper))
-	app.SetIsEvmTxHandler(NewIsEvmTxHandler)
-	app.SetChangeBalanceHandler(NewFeeCollectorAccHandler(app.AccountKeeper, app.SupplyKeeper))
-	app.SetGetTxFeeHandler(NewGetTxFeeHandler())
-	app.SetFixLog(NewFixLog(app.EvmKeeper))
+	app.SetPallTxHandler(NewIsEvmTxHandler, NewFeeCollectorAccHandler(app.AccountKeeper, app.SupplyKeeper), NewGetTxFeeHandler(), NewFixLog(app.EvmKeeper))
 
 	if loadLatest {
 		err := app.LoadLatestVersion(app.keys[bam.MainStoreKey])
@@ -604,42 +600,5 @@ func NewAccHandler(ak auth.AccountKeeper) sdk.AccHandler {
 		ctx sdk.Context, addr sdk.AccAddress,
 	) (uint64, sdk.Coins) {
 		return ak.GetAccount(ctx, addr).GetSequence(), ak.GetAccount(ctx, addr).GetCoins()
-	}
-}
-
-func NewIsEvmTxHandler(tx sdk.Tx) bool {
-	if tx != nil {
-		switch tx.(type) {
-		case evmtypes.MsgEthereumTx:
-			return true
-		}
-	}
-	return false
-}
-
-func NewFeeCollectorAccHandler(ak auth.AccountKeeper, sk supply.Keeper) sdk.FeeCollectorAccHandler {
-	return func(ctx sdk.Context, updateValue bool, balance sdk.Coins) sdk.Coins {
-		acc := ak.GetAccount(ctx, sk.GetModuleAddress(auth.FeeCollectorName))
-		if updateValue {
-			acc.SetCoins(balance)
-			ak.SetAccount(ctx, acc)
-		}
-		return acc.GetCoins()
-	}
-}
-
-func NewGetTxFeeHandler() sdk.GetTxFeeHandler {
-	return func(tx sdk.Tx) sdk.Coins {
-		feeTx, ok := tx.(authante.FeeTx)
-		if ok {
-			return feeTx.GetFee()
-		}
-		return sdk.Coins{}
-	}
-}
-
-func NewFixLog(ek *evm.Keeper) sdk.LogFix {
-	return func(isAnteFailed [][]string) (logs map[int][]byte) {
-		return ek.FixLog(isAnteFailed)
 	}
 }

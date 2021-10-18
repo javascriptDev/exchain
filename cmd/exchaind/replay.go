@@ -194,6 +194,7 @@ var (
 	nowbb       dbm.DB
 )
 
+// TODO need delete
 func SaveBlock(ctx *server.Context, originDB *store.BlockStore, height int64) {
 	if !alreadyInit {
 		var err error
