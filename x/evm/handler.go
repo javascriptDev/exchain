@@ -1,8 +1,6 @@
 package evm
 
 import (
-	"unsafe"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/ethereum/go-ethereum/common"
@@ -155,10 +153,7 @@ func handleMsgEthereumTx(ctx sdk.Context, k *Keeper, msg types.MsgEthereumTx) (*
 	StartTxLog("TransitionDb")
 	executionResult, resultData, err := st.TransitionDb(ctx, config)
 	if ctx.IsAsync() {
-		bytes2str := func(b []byte) string {
-			return *(*string)(unsafe.Pointer(&b))
-		}
-		k.LogsManages.Set(bytes2str(ctx.TxBytes()), keeper.TxResult{
+		k.LogsManages.Set(string(ctx.TxBytes()), keeper.TxResult{
 			ResultData: resultData,
 			Err:        err,
 		})

@@ -12,7 +12,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/server"
 	"github.com/okex/exchain/app"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"github.com/tendermint/iavl"
 	tmlog "github.com/tendermint/tendermint/libs/log"
 	"github.com/tendermint/tendermint/mock"
@@ -39,7 +38,6 @@ func repairStateCmd(ctx *server.Context) *cobra.Command {
 			log.Println("--------- repair data success ---------")
 		},
 	}
-	cmd.Flags().Int64Var(&commitInterval, FlagCommitInterval, 100, "The number of interval heights for submitting Commit")
 	cmd.Flags().Bool(pallTx, false, "parallel execution for evm txs")
 	cmd.Flags().Int64(FlagStartHeight, 0, "Set the start block height for repair")
 	return cmd
